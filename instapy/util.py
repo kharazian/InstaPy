@@ -507,8 +507,11 @@ def getMediaData(
     browser,
 ):
     additional_data = get_additional_data(browser)
-    data = additional_data["graphql"]["shortcode_media"]
-
+    try:
+        data = additional_data["graphql"]["shortcode_media"]
+    except:
+        data = additional_data['items'][0]
+        
     if query.find(".") == -1:
         data = data[query]
     else:

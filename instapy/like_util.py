@@ -592,14 +592,23 @@ def check_link(
     location_name = None
 
     if graphql:
-        media = post_page["graphql"]["shortcode_media"]
-        is_video = media["is_video"]
-        user_name = media["owner"]["username"]
-        image_text = media["edge_media_to_caption"]["edges"]
-        image_text = image_text[0]["node"]["text"] if image_text else None
-        location = media["location"]
-        location_name = location["name"] if location else None
-        media_edge_string = get_media_edge_comment_string(media)
+        try:
+            media = post_page["graphql"]["shortcode_media"]
+            is_video = media["is_video"]
+            user_name = media["owner"]["username"]
+            image_text = media["edge_media_to_caption"]["edges"]
+            image_text = image_text[0]["node"]["text"] if image_text else None
+            location = media["location"]
+            location_name = location["name"] if location else None
+            media_edge_string = get_media_edge_comment_string(media)
+        except:
+            is_video = ''
+            user_name = ''
+            image_text = ''
+            image_text = ''
+            location = ''
+            location_name = ''
+            media_edge_string = ''
         # Gets all comments on media
         comments = (
             media[media_edge_string]["edges"]
@@ -615,27 +624,33 @@ def check_link(
 
     else:
         logger.info("post_page: {}".format(post_page))
-        media = post_page[0]["shortcode_media"]
-        is_video = media["is_video"]
-        user_name = media["owner"]["username"]
-        image_text = media["caption"]
-        owner_comments = browser.execute_script(
-            """
-            latest_comments = window._sharedData.entry_data.PostPage[
-            0].media.comments.nodes;
-            if (latest_comments === undefined) {
-                latest_comments = Array();
-                owner_comments = latest_comments
-                    .filter(item => item.user.username == arguments[0])
-                    .map(item => item.text)
-                    .reduce((item, total) => item + '\\n' + total, '');
-                return owner_comments;}
-            else {
-                return null;}
-        """,
-            user_name,
-        )
-
+        try:
+            media = post_page[0]["shortcode_media"]
+            is_video = media["is_video"]
+            user_name = media["owner"]["username"]
+            image_text = media["caption"]
+            owner_comments = browser.execute_script(
+                """
+                latest_comments = window._sharedData.entry_data.PostPage[
+                0].media.comments.nodes;
+                if (latest_comments === undefined) {
+                    latest_comments = Array();
+                    owner_comments = latest_comments
+                        .filter(item => item.user.username == arguments[0])
+                        .map(item => item.text)
+                        .reduce((item, total) => item + '\\n' + total, '');
+                    return owner_comments;}
+                else {
+                    return null;}
+            """,
+                user_name,
+            )
+        except:
+            media = ''
+            is_video = False if post_page['items'][0]['media_type'] == 1 else True
+            user_name = post_page['items'][0]['user']['username']
+            image_text = ''
+            owner_comments = ''
     if owner_comments == "":
         owner_comments = None
 
@@ -835,10 +850,12 @@ def get_tags(browser, url):
     web_address_navigator(browser, url)
 
     additional_data = get_additional_data(browser)
-    image_text = additional_data["graphql"]["shortcode_media"]["edge_media_to_caption"][
-        "edges"
-    ][0]["node"]["text"]
-
+    try:
+        image_text = additional_data["graphql"]["shortcode_media"]["edge_media_to_caption"][
+            "edges"
+        ][0]["node"]["text"]
+    except:
+        image_text = ''
     if not image_text:
         image_text = ""
 
@@ -923,10 +940,12 @@ def verify_liking(browser, maximum, minimum, logger):
     & minimum values defined by user"""
 
     post_page = get_additional_data(browser)
-    likes_count = post_page["graphql"]["shortcode_media"]["edge_media_preview_like"][
-        "count"
-    ]
-
+    try:
+        likes_count = post_page["graphql"]["shortcode_media"]["edge_media_preview_like"][
+            "count"
+        ]
+    except:
+        likes_count = post_page['items'][0]['like_count']
     if not likes_count:
         likes_count = 0
 

@@ -329,8 +329,10 @@ def get_comments_on_post(
 def is_commenting_enabled(browser, logger):
     """Find out if commenting on the post is enabled"""
 
-    comments_disabled = getMediaData("comments_disabled", browser)
-
+    try:
+        comments_disabled = getMediaData("comments_disabled", browser)
+    except:
+        comments_disabled = not getMediaData("comment_likes_enabled", browser)
     if comments_disabled is True:
         msg = "Comments are disabled for this post."
         return False, msg
@@ -341,7 +343,10 @@ def is_commenting_enabled(browser, logger):
 def get_comments_count(browser, logger):
     """Get the number of total comments in the post"""
 
-    comments_count = getMediaData("edge_media_preview_comment.count", browser)
+    try:
+        comments_count = getMediaData("edge_media_preview_comment.count", browser)
+    except:
+        comments_count = getMediaData("comment_count", browser)
     return comments_count, "Success"
 
 
@@ -369,7 +374,7 @@ def verify_commented_image(browser, link, owner, logger):
                 )
                 return True, message
 
-    except NoSuchElementException:
+    except:
         # Cannot be determined if the post has been comment by InstaPy user,
         # and then it will not be commented until next loop, maybe comments
         # on the post have been limited. Return True, to emulate or assume the
@@ -377,7 +382,7 @@ def verify_commented_image(browser, link, owner, logger):
         message = (
             "--> Failed to get comments on this post, will not comment the post..."
         )
-        return True, message
+        return None, message
 
     message = "--> Could not found owner's comment in this post, trying to comment..."
     return None, message

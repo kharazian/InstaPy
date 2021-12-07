@@ -66,8 +66,8 @@ with smart_run(session):
 
     # general settings
     session.set_dont_like(['sad', 'rain', 'depression'])
-    session.set_do_follow(enabled=True, percentage=80, times=1)
-    session.set_do_comment(enabled=True, percentage=80)
+    session.set_do_follow(enabled=True, percentage=100, times=1)
+    session.set_do_comment(enabled=True, percentage=100)
     session.set_comments([	'All Right!'
 							,'Exactly right'
 							,'Excellent!'
